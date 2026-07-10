@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+:root { font-family: 'Archivo', system-ui, sans-serif; }
+.font-display { font-family: 'Archivo Black', sans-serif; }
+.font-mono2 { font-family: 'Space Mono', monospace; }

@@ -1,0 +1,10 @@
+node_modules
+dist
+*.local
+.DS_Store
+vite.config.js
+vite.config.d.ts
+*.tsbuildinfo
+# heavy local assets (keep out of git if large)
+public/ford_mustang_1968.glb
+public/rooftop_night_2k.hdr
