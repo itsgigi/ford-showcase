@@ -1,9 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useProgress } from '@react-three/drei';
 import { Scene } from './components/Scene';
 import { Intro } from './components/Intro';
 import { CreditsModal } from './components/CreditsModal';
+import { LoadingScreen } from './components/LoadingScreen';
 import type { NeonMode } from './components/Neons';
 import { ASSETS } from './config';
+import { useAssetPreload } from './hooks/useAssetPreload';
+
+// riferimento stabile: se ricreato ad ogni render, l'effetto del preload rilancerebbe il fetch
+const PRELOAD_VIDEOS = [ASSETS.introLoopVideo, ASSETS.revealVideo];
 
 export default function App() {
   const [phase, setPhase] = useState<'intro' | 'interactive'>('intro');
@@ -11,16 +17,34 @@ export default function App() {
   const [creditsOpen, setCreditsOpen] = useState(false);
   const interactive = phase === 'interactive';
 
+  // GLB/HDR/texture passano dal THREE.LoadingManager (drei) → useProgress;
+  // i video no, li scarichiamo a mano per un progresso byte-accurato
+  const { active: threeLoading, progress: threeProgress } = useProgress();
+  const { progress: videoProgress, ready: videosReady } = useAssetPreload(PRELOAD_VIDEOS);
+  const ready = !threeLoading && videosReady;
+  const loadProgress = Math.round((threeProgress / 100) * 50 + videoProgress * 50);
+
+  // il sito si apre solo a caricamento finito: la LoadingScreen resta
+  // montata un attimo in più per far girare la sua dissolvenza in uscita
+  const [loaderVisible, setLoaderVisible] = useState(true);
+  useEffect(() => {
+    if (!ready) return;
+    const t = setTimeout(() => setLoaderVisible(false), 500);
+    return () => clearTimeout(t);
+  }, [ready]);
+
   return (
     <div className="relative h-full w-full overflow-hidden bg-black text-white">
-      {/* la scena è SEMPRE montata: compila shader e carica il GLB durante l'intro */}
+      {/* la scena è SEMPRE montata: compila shader e carica il GLB durante il preload */}
       <div className="absolute inset-0 z-10">
         <Scene interactive={interactive} neonMode={neonMode} />
       </div>
 
-      {phase === 'intro' && (
+      {ready && phase === 'intro' && (
         <Intro onDone={() => setPhase('interactive')} onNeon={setNeonMode} />
       )}
+
+      {loaderVisible && <LoadingScreen progress={loadProgress} fading={ready} />}
 
       {/* ------- UI overlay ------- */}
       <header
