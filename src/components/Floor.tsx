@@ -47,7 +47,7 @@ export function Floor() {
         blur={[400, 120]}
         mixBlur={1.1}
         mixStrength={FLOOR.reflectionStrength}
-        resolution={1024}
+        resolution={640}
         depthScale={0.7}
         minDepthThreshold={0.3}
         maxDepthThreshold={1.3}

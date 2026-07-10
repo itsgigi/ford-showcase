@@ -32,7 +32,7 @@ export function Scene({ interactive, neonMode = 'on' }: { interactive: boolean; 
   return (
     <Canvas
       shadows
-      dpr={[1, 2]}
+      dpr={[1, 1.5]}
       gl={{ antialias: true, preserveDrawingBuffer: true }}
       camera={{ position: HANDOFF.cameraPosition, fov: HANDOFF.fov }}
       onCreated={({ gl, camera, scene }) => {
@@ -73,13 +73,13 @@ export function Scene({ interactive, neonMode = 'on' }: { interactive: boolean; 
         distance={22}
       />
       {/* key fredda per staccare il tetto dell'auto dal fondo */}
-      <directionalLight position={[-3, 6, 3]} intensity={0.5} color="#cfe0ff" castShadow shadow-mapSize={[2048, 2048]} />
+      <directionalLight position={[-3, 6, 3]} intensity={0.5} color="#cfe0ff" castShadow shadow-mapSize={[1024, 1024]} />
 
       <Car available={carOk} />
       <Cloth available={clothOk} />
       <Floor />
       <Rain />
-      <ContactShadows position={[0, 0.004, 0]} opacity={1} blur={1.3} scale={10} far={10} resolution={1024} />
+      <ContactShadows position={[0, 0.004, 0]} opacity={1} blur={1.3} scale={10} far={10} resolution={512} />
 
       <CameraParallax enabled={interactive} />
 
