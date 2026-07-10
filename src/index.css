@@ -3,3 +3,13 @@
 :root { font-family: 'Archivo', system-ui, sans-serif; }
 .font-display { font-family: 'Archivo Black', sans-serif; }
 .font-mono2 { font-family: 'Space Mono', monospace; }
+
+/* invito al drag: pulsa una volta ogni 5s, resta ferma il resto del ciclo */
+@keyframes drag-glow {
+  0%, 65% { transform: scale(1); opacity: 0; }
+  80% { opacity: 0.55; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.animate-drag-glow {
+  animation: drag-glow 3s ease-out infinite;
+}

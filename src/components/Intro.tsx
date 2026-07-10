@@ -150,6 +150,7 @@ const TRACK_ARC_D = describeArc(TRACK_ARC_START_DEG, TRACK_ARC_START_DEG + TRACK
 function DragToStart({ onStart }: { onStart: () => void }) {
   const ringRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
   const arcRef = useRef<SVGPathElement>(null);
   const dragging = useRef(false);
   const center = useRef({ x: 0, y: 0 });
@@ -167,11 +168,19 @@ function DragToStart({ onStart }: { onStart: () => void }) {
   const setSnapTransition = (on: boolean) => {
     if (handleRef.current) handleRef.current.style.transition = on ? 'left 250ms ease-out, top 250ms ease-out' : '';
   };
+  // il glow è ancorato al punto di riposo dell'handle: durante il drag
+  // l'handle si sposta ma il glow no, quindi va spento per non "sfasarsi"
+  const setGlowActive = (active: boolean) => {
+    if (!glowRef.current) return;
+    glowRef.current.style.animationPlayState = active ? 'running' : 'paused';
+    glowRef.current.style.opacity = active ? '' : '0';
+  };
 
   const reset = () => {
     setSnapTransition(true);
     setHandleAngle(RING_START_ANGLE_DEG);
     setArc(RING_START_ANGLE_DEG);
+    setGlowActive(true);
   };
 
   const onPointerMove = (e: PointerEvent) => {
@@ -204,6 +213,7 @@ function DragToStart({ onStart }: { onStart: () => void }) {
     center.current = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
     dragging.current = true;
     setSnapTransition(false);
+    setGlowActive(false);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
   };
@@ -227,17 +237,28 @@ function DragToStart({ onStart }: { onStart: () => void }) {
           font-size fluido via clamp così resta grande su desktop ampio senza
           mai tagliarsi su viewport più strette. */}
       <span
-        className="font-mono2 ml-6 lg:ml-14 text-2xl lg:text-3xl absolute inset-x-0 -bottom-10 lg:bottom-10 whitespace-nowrap text-center uppercase text-white/85"
+        className="font-mono2 ml-6 lg:ml-12 text-2xl lg:text-3xl absolute inset-x-0 -bottom-10 lg:bottom-10 whitespace-nowrap text-center uppercase text-white/85"
         style={{ letterSpacing: '0.35em' }}
       >
         Drag to reveal
       </span>
 
+      {/* invito al drag: glow radiale che pulsa una volta ogni 5s sull'handle */}
+      <div
+        ref={glowRef}
+        style={{
+          left: `${handlePos.left}%`,
+          top: `${handlePos.top}%`,
+          background: 'radial-gradient(circle, rgba(252,211,77,0.9) 0%, rgba(252,211,77,0) 70%)',
+        }}
+        className="pointer-events-none absolute h-7 w-7 -translate-x-[55%] -translate-y-1/2 animate-drag-glow rounded-full"
+      />
+
       <div
         ref={handleRef}
         onPointerDown={onPointerDown}
         style={{ left: `${handlePos.left}%`, top: `${handlePos.top}%` }}
-        className="pointer-events-auto absolute h-7 w-7 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none rounded-full border border-amber-300/80 bg-black/60 backdrop-blur active:cursor-grabbing"
+        className="pointer-events-auto absolute h-7 w-7 -translate-x-[55%] -translate-y-1/2 cursor-grab touch-none rounded-full border border-amber-300/60 bg-black/60 backdrop-blur active:cursor-grabbing"
       />
     </div>
   );
